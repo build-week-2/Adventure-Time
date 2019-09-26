@@ -3,7 +3,7 @@ import axios from 'axios';
 import shajs from "sha.js";
 import './App.css';
 
-const apiKey = "0959bb3b3c9de89caf95c8965c435e9abf6bcbe8";
+const apiKey = "145874ce8c6767572176e2bfbf99ca40693af899";
 const authHeader = {
   headers: {
     Authorization: `Token ${apiKey}`
@@ -523,6 +523,150 @@ const App = () => {
   const [pirate, setPirate] = useState(false);
   const [mine, setMine] = useState(false);
   const [shop, setShop] = useState(false);
+
+  useEffect(() => {
+    axios
+      .get(`${baseUrl}/adv/init`, authHeader)
+      .then(res => {
+        setRoom(res.data);
+        setCooldown(res.data.cooldown);
+        if (!roomGraph[res.data.room_id]) {
+          roomGraph[res.data.room_id] = { title: res.data.title };
+          for (let i = 0; i < res.data.exits.length; i++) {
+            roomGraph[res.data.room_id][res.data.exits[i]] = "?";
+          }
+          localStorage.setItem("roomGraph", JSON.stringify(roomGraph));
+        }
+      })
+      .catch(err => console.log(err));
+  }, []);
+
+  useEffect(() => {
+    let interval = setInterval(() => {
+      if (cooldown > 0) {
+        setCooldown(cooldown - 1);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [cooldown]);
+
+
+  useEffect(() => {
+    setCooldown(currentRoom.cooldown);
+    if (dft) {
+      setTimeout(async () => {
+        if (
+          roomGraph[currentRoom.room_id] &&
+          Object.values(roomGraph[currentRoom.room_id]).includes("?")
+        ) {
+          const exits = currentRoom.exits;
+          const randExits = shuffle(exits);
+          console.log(randExits);
+          for (let i = 0; i < randExits.length; i++) {
+            if (roomGraph[currentRoom.room_id][randExits[i]] === "?") {
+              console.log(`Moving ${randExits[i]}`);
+              await move(randExits[i]);
+              break;
+            }
+          }
+        } else if (
+          roomGraph[currentRoom.room_id] &&
+          !Object.values(roomGraph[currentRoom.room_id]).includes("?")
+        ) {
+          setDSearch(false);
+          if (Object.keys(roomGraph).length < 500) {
+            setBSearch(true);
+          }
+        }
+      }, currentRoom.cooldown * 1000);
+
+    } else if (bfs) {
+      setTimeout(async () => {
+        const path = routeToUnexplored(currentRoom);
+        console.log(path);
+        if (path.length > 1) {
+          for (let i = 1; i < path.length; i++) {
+            for (let direction in roomGraph[currentRoom.room_id]) {
+              if (roomGraph[currentRoom.room_id][direction] === path[i]) {
+                await move(direction);
+                break;
+              }
+            }
+          }
+        } else if (path.length === 1) {
+          setBSearch(false);
+          if (Object.keys(roomGraph).length < 500) {
+            setDSearch(true);
+          }
+        }
+      }, currentRoom.cooldown * 1000);
+    } else if (pirate) {
+      console.log("Moving to Pirate Room");
+      setTimeout(async () => {
+        const path = routeToTarget("pirate");
+        if (path.length > 1 && currentRoom.room_id !== 467) {
+          for (let i = 1; i < path.length; i++) {
+            for (let direction in roomGraph[currentRoom.room_id]) {
+              if (roomGraph[currentRoom.room_id][direction] === path[i]) {
+                await move(direction);
+                break;
+              }
+            }
+          }
+        } else if (currentRoom.room_id === 467) {
+          setPirate(false);
+        }
+      }, currentRoom.cooldown * 1000);
+    } else if (shop) {
+      console.log("Moving to Shop");
+      setTimeout(async () => {
+        const path = routeToTarget("shop");
+        if (path.length > 1 && currentRoom.room_id !== 1) {
+          for (let i = 1; i < path.length; i++) {
+            for (let direction in roomGraph[currentRoom.room_id]) {
+              if (roomGraph[currentRoom.room_id][direction] === path[i]) {
+                await move(direction);
+                break;
+              }
+            }
+          }
+        } else if (currentRoom.room_id === 1) {
+          setShop(false);
+        }
+      }, currentRoom.cooldown * 1000);
+    } else if (mine) {
+      console.log("Moving to Mine");
+      setTimeout(async () => {
+        const path = routeToTarget("mine");
+        if (path.length > 1 && currentRoom.room_id !== 250) {
+          for (let i = 1; i < path.length; i++) {
+            for (let direction in roomGraph[currentRoom.room_id]) {
+              if (roomGraph[currentRoom.room_id][direction] === path[i]) {
+                await move(direction);
+                break;
+              }
+            }
+          }
+        } else if (currentRoom.room_id === 250) {
+          setMine(false);
+        }
+      }, currentRoom.cooldown * 1000);
+    }
+  }, [currentRoom, bfs, dft, pirate, shop, mine]);
+
+
+  const flip = direction => {
+    if (direction === "n") {
+      return "s";
+    } else if (direction === "s") {
+      return "n";
+    } else if (direction === "e") {
+      return "w";
+    } else if (direction === "w") {
+      return "e";
+    }
+  };
 
 
 export default App;
