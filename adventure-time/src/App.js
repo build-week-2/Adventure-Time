@@ -758,8 +758,100 @@ const App = () => {
     }
   };
 
+  const shuffle = array => {
+    for (let i = array.length - 1; i > 0; i--) {
+      let j = Math.floor(Math.random() * (i + 1)); 
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  };
+  const routeToUnexplored = current_room => {
+    const q = [];
+    const visited = new Set();
+    q.unshift([currentRoom.room_id]);
 
+    while (q.length > 0) {
+      let path = q.pop();
+      let room = path[path.length - 1];
+      console.log("roomGraph of room", roomGraph[room]);
 
+      if (!visited.has(room)) {
+        visited.add(room);
+
+        for (let exit in roomGraph[room]) {
+          if (roomGraph[room][exit] === "?") {
+            return path;
+          }
+          let path_copy = [...path];
+          path_copy.push(roomGraph[room][exit]);
+          q.unshift(path_copy);
+        }
+      }
+    }
+  };
+
+  const routeToTarget = target_room => {
+    let target = null;
+    if (target_room === "shop") {
+      target = 1;
+      setShop(true);
+    } else if (target_room === "pirate") {
+      target = 467;
+      setPirate(true);
+    } else if (target_room === "mine") {
+      target = 250;
+      setMine(true);
+    }
+
+    const q = [];
+    const visited = new Set();
+    q.unshift([currentRoom.room_id]);
+
+    while (q.length > 0) {
+      let path = q.pop();
+      let room = path[path.length - 1];
+
+      if (!visited.has(room)) {
+        visited.add(room);
+
+        for (let exit in roomGraph[room]) {
+          if (roomGraph[room][exit] === target) {
+            path.push(roomGraph[room][exit]);
+            console.log(path);
+            return path;
+          }
+          let path_copy = [...path];
+          path_copy.push(roomGraph[room][exit]);
+          q.unshift(path_copy);
+        }
+      }
+    }
+  };
+  const changeName = () => {
+    console.log("Going to attempt name change now");
+    const postObject = {
+      name: "Not Me",
+      confirm: "aye"
+    };
+
+    axios({
+      method: "post",
+      url: `${baseUrl}/adv/change_name/`,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${apiKey}`
+      },
+      data: postObject
+    })
+      .then(res => {
+        console.log(res.data.messages);
+
+        setTimeout(res.data.cooldown * 1000);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
 
 
 
