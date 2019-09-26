@@ -668,5 +668,103 @@ const App = () => {
     }
   };
 
+  const sell = item => {
+    const firstPostObject = {
+      name: "treasure",
+      confirm: "yes"
+    };
 
+    axios({
+      method: "post",
+      url: `${baseUrl}/adv/sell/`,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${apiKey}`
+      },
+      data: firstPostObject
+    })
+      .then(res => {
+        console.log(res.data.messages);
+
+        setTimeout(() => {
+          
+        }, res.data.cooldown * 1000);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+  const pickUp = items =>{
+    
+    const postObject = {
+        name: "treasure"
+      }
+      axios({
+          method: 'post',
+          url: `${baseUrl}/adv/take/`,
+          headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Token ${apiKey}`
+          },
+          data: postObject
+      })
+      .then(res =>{
+        const items = res.data.items
+          console.log(res.data)
+          setTimeout(res.data.cooldown * 1000)
+      })
+      .catch(err =>{
+          console.log(err)
+      })
+  };
+
+  const move = direction => {
+    console.log(roomGraph);
+    console.log(Object.keys(roomGraph).length);
+
+    if (roomGraph[currentRoom.room_id][direction] !== "?") {
+      console.log("fast explorer mode attempt");
+      axios
+        .post(
+          `${baseUrl}/adv/move`,
+          {
+            direction: direction,
+            next_room_id: `${roomGraph[currentRoom.room_id][direction]}`
+          },
+          authHeader
+        )
+        .then(res => setRoom(res.data))
+        .catch(err => console.log(err));
+    } else {
+      axios
+        .post(`${baseUrl}/adv/move`, { direction: direction }, authHeader)
+        .then(res => {
+          const currRoom = res.data.room_id;
+          const exits = res.data.exits;
+          const oldRoom = currentRoom.room_id;
+          if (!roomGraph[currRoom]) {
+            roomGraph[currRoom] = { title: res.data.title };
+            exits.forEach(exit => {
+              roomGraph[currRoom][exit] = "?";
+            });
+          }
+          roomGraph[oldRoom][direction] = currRoom;
+          roomGraph[currRoom][flip(direction)] = oldRoom;
+          localStorage.setItem("roomGraph", JSON.stringify(roomGraph));
+          setRoom(res.data);
+         
+        })
+        .catch(err => console.log(err));
+    }
+  };
+
+
+
+
+
+
+
+
+
+};
 export default App;
