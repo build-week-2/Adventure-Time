@@ -853,10 +853,100 @@ const App = () => {
       });
   };
 
+  const startMining = () => {
+    if (currentRoom.room_id === 250) {
+      let prevBlock = "";
+      axios
+        .get(`${baseUrl}/bc/last_proof`, authHeader)
+        .then(res => {
+          console.log(res.data);
+          let difficulty = res.data.difficulty;
+          prevBlock = JSON.stringify(res.data.proof);
+          console.log(prevBlock);
+          let p = 550867667;
+          while (test_proof(prevBlock, p, difficulty) !== true) {
+            if (p % 10000 === 0) {
+              console.log("p is now", p);
+            }
+            p = Math.floor(Math.random() * 1000000000);
+          }
+          console.log("proof", p);
+          setTimeout(() => {
+            axios
+              .post(`${baseUrl}/bc/mine`, { proof: p }, authHeader)
+              .then(res => console.log(res))
+              .catch(err => console.log(err));
+          }, 1000);
+        })
+        .catch(err => console.log(err));
+    }
+  };
 
+  const test_proof = (block_string, proof, difficulty) => {
+    let guess = `${block_string}${proof}`;
+    let guessHash = hash(guess);
+    if (proof % 10000 === 0) {
+      console.log("guessHash", guessHash);
+    }
 
+    let startString = "";
+    for (let i = 0; i < difficulty; i++) {
+      startString += 0;
+    }
 
+    return guessHash.slice(0, difficulty) === startString;
+  };
 
+  const hash = string => {
+    return shajs("sha256")
+      .update(string)
+      .digest("hex");
+  };
 
+  return (
+    <div className="App">
+      <div className="room-info">
+        <div>Title: {currentRoom.title}</div>
+        <div>Room: {currentRoom.room_id}</div>
+        <div>Coordinates: {currentRoom.coordinates}</div>
+        <div>Description: {currentRoom.description}</div>
+        <div>Exits: {currentRoom.exits}</div>
+        <div>Items: {currentRoom.items}</div>
+      </div>
+      <div>
+        {currentRoom.exits &&
+          currentRoom.exits.map(exit => (
+            <button key={exit} className="move-btn" onClick={() => move(exit)}>
+              {exit.toUpperCase()}
+            </button>
+          ))}
+      </div>
+      <button onClick={() => routeToTarget("shop")}>
+        Go to Shop
+      </button>
+      <button onClick={() => routeToTarget("pirate")}>
+        Go to Pirate Room
+      </button>
+      <button onClick={() => routeToTarget("mine")}>
+        Go to Mining Room
+      </button>
+      <button onClick={() => pickUp()}>
+        Take Item
+      </button>
+      <button onClick={() => sell()}>
+        Sell Item
+      </button>
+      <button onClick={() => changeName()}>
+        Change Name
+      </button>
+      <button onClick={() => startMining()}>
+        Mine a Coin
+      </button>
+      <section className="cooldown">
+        {cooldown > 0 ? `Cooldown: ${cooldown}` : "Cooldown Over"}
+      </section>
+    </div>
+  );
 };
+
 export default App;
