@@ -533,7 +533,8 @@ const App = () => {
   const [Apierror, setApiError] = useState();
   const [guess, setGuess] = useState(false);
   const [proof, setProof] = useState(false);
-  const [consoleLog, setConsoleLog] =useState(false)
+  const [consoleLog, setConsoleLog] = useState(false)
+  const [transaction, setTrasaction] = useState(false)
 
   useEffect(() => {
     axios
@@ -717,7 +718,7 @@ const App = () => {
       data: postObject
     })
       .then(res => {
-        const items = res.data.items;
+        // const items = res.data.items;
         console.log(res.data);
         setTimeout(res.data.cooldown * 1000);
       })
@@ -893,7 +894,11 @@ const App = () => {
           setTimeout(() => {
             axios
               .post(`${baseUrl}/bc/mine`, { proof: p }, authHeader)
-              .then(res => console.log(res))
+              .then(res => {
+                setTrasaction(res.data)
+                console.log(res)
+              }
+                )
               .catch(err => console.log(err));
           }, 1000);
         })
@@ -926,11 +931,11 @@ const App = () => {
   return (
     <div className="App">
       {/* {console.log(currentRoom)} */}
-      <img src={Logo} className="logo" />
+      <img src={Logo} className="logo" alt="" />
       <div className="dashboard">
         <div className="room-info">
           <div className="info-text">
-            <img src={Dashboard} className="dashboard-logo" />
+            <img src={Dashboard} className="dashboard-logo" alt=""/>
             <div>
               {currentRoom.title}, ID: {currentRoom.room_id}
             </div>
@@ -952,7 +957,7 @@ const App = () => {
 
         <div className="commands">
           <div className="directions">
-            <img src={Directions} className="directions-logo" />
+            <img src={Directions} className="directions-logo" alt=""/>
 
             {currentRoom.exits &&
               currentRoom.exits.map(exit => (
@@ -967,7 +972,7 @@ const App = () => {
           </div>
           <div className="actionscontainer">
             <div className="shortcuts">
-              <img src={Shortcuts} className="shortcut-logo" />
+              <img src={Shortcuts} className="shortcut-logo" alt=""/>
               {currentRoom.room_id === 1 ? (
                 ""
               ) : (
@@ -992,7 +997,7 @@ const App = () => {
               (currentRoom.items && currentRoom.items.length > 0) ||
               currentRoom.room_id === 467 ||
               currentRoom.room_id === 250 ? (
-                <img src={Actions} className="actions-logo" />
+                <img src={Actions} className="actions-logo" alt=""/>
               ) : (
                 ""
               )}
@@ -1024,6 +1029,7 @@ const App = () => {
               guess={guess}
               proof={proof}
               consoleLog={consoleLog}
+              transaction={transaction}
             />
           </div>
         </div>

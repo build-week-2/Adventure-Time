@@ -62,10 +62,29 @@ export default function DraggableDialog(props) {
               ) : (
                 ""
               )}
-              {props.Apierror ? <p>Error: Request failed with status code 400</p> : ""}
-              {props.requestError ? props.requestError  : ""}
-              {!props.setGuess ? <p>GuessHash: {props.setGuess}</p>  : ""}
-              {!props.setProof ? <p>Proof: {props.setProof}</p>  : ""}
+              {props.Apierror ? (
+                <p>Error: Request failed with status code 400</p>
+              ) : (
+                ""
+              )}
+              {props.requestError ? props.requestError : ""}
+              {props.guess ? <p>guess_hash: {props.guess}</p> : ""}
+              {props.proof ? <p>Proof: {props.proof}</p> : ""}
+              {props.transaction ? (
+                <p>
+                  index:{props.transaction.index} <br />
+                  messages:{props.transaction.messages}
+                  <br />
+                  previous_hash{props.transaction.previous_hash}
+                  <br />
+                  proof:{props.transaction.proof}
+                  <br />
+                  transactions:{props.transaction.transactions}
+                  <br />
+                </p>
+              ) : (
+                ""
+              )}
             </p>
           </DialogContentText>
         </DialogContent>
