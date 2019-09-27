@@ -5,6 +5,16 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-family: 'Fruktur';
+  font-size: 20px;
+  /* font-weight: bold; */
+  background-image: url("https://i.pinimg.com/originals/ac/b7/1a/acb71a3ce8dd7fbff6a66069aba3bb55.jpg");
+  height: 100%;
+  width: 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
 }
 
 code {

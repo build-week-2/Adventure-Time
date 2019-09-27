@@ -1,9 +1,15 @@
-import React, {useState, useEffect} from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import shajs from "sha.js";
-import './App.css';
+import "./App.css";
+import Logo from "./components/logo.png";
+import Dashboard from "./components/dashboard.png";
+import Directions from "./components/directions.png";
+import Actions from "./components/actions.png";
+import Shortcuts from "./components/shortcuts.png";
+import PaperComponent from "./components/materialui";
 
-const apiKey = "145874ce8c6767572176e2bfbf99ca40693af899";
+const apiKey = localStorage.getItem("token");
 const authHeader = {
   headers: {
     Authorization: `Token ${apiKey}`
@@ -523,6 +529,11 @@ const App = () => {
   const [pirate, setPirate] = useState(false);
   const [mine, setMine] = useState(false);
   const [shop, setShop] = useState(false);
+  const [shortcut, setShortcut] = useState(false);
+  const [Apierror, setApiError] = useState();
+  const [guess, setGuess] = useState(false);
+  const [proof, setProof] = useState(false);
+  const [consoleLog, setConsoleLog] =useState(false)
 
   useEffect(() => {
     axios
@@ -538,7 +549,10 @@ const App = () => {
           localStorage.setItem("roomGraph", JSON.stringify(roomGraph));
         }
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        console.log(err);
+        setApiError("Error: Request failed with status code 400");
+      });
   }, []);
 
   useEffect(() => {
@@ -550,7 +564,6 @@ const App = () => {
 
     return () => clearInterval(interval);
   }, [cooldown]);
-
 
   useEffect(() => {
     setCooldown(currentRoom.cooldown);
@@ -580,7 +593,6 @@ const App = () => {
           }
         }
       }, currentRoom.cooldown * 1000);
-
     } else if (bfs) {
       setTimeout(async () => {
         const path = routeToUnexplored(currentRoom);
@@ -655,7 +667,6 @@ const App = () => {
     }
   }, [currentRoom, bfs, dft, pirate, shop, mine]);
 
-
   const flip = direction => {
     if (direction === "n") {
       return "s";
@@ -686,41 +697,40 @@ const App = () => {
       .then(res => {
         console.log(res.data.messages);
 
-        setTimeout(() => {
-          
-        }, res.data.cooldown * 1000);
+        setTimeout(() => {}, res.data.cooldown * 1000);
       })
       .catch(err => {
         console.log(err);
       });
   };
-  const pickUp = items =>{
-    
+  const pickUp = item => {
     const postObject = {
-        name: "treasure"
-      }
-      axios({
-          method: 'post',
-          url: `${baseUrl}/adv/take/`,
-          headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Token ${apiKey}`
-          },
-          data: postObject
+      name: "treasure"
+    };
+    axios({
+      method: "post",
+      url: `${baseUrl}/adv/take/`,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${apiKey}`
+      },
+      data: postObject
+    })
+      .then(res => {
+        const items = res.data.items;
+        console.log(res.data);
+        setTimeout(res.data.cooldown * 1000);
       })
-      .then(res =>{
-        const items = res.data.items
-          console.log(res.data)
-          setTimeout(res.data.cooldown * 1000)
-      })
-      .catch(err =>{
-          console.log(err)
-      })
+      .catch(err => {
+        console.log(err);
+        setApiError("Error: Request failed with status code 400");
+      });
   };
 
   const move = direction => {
     console.log(roomGraph);
     console.log(Object.keys(roomGraph).length);
+    // setShortcut(Object.keys(roomGraph).length)
 
     if (roomGraph[currentRoom.room_id][direction] !== "?") {
       console.log("fast explorer mode attempt");
@@ -734,7 +744,10 @@ const App = () => {
           authHeader
         )
         .then(res => setRoom(res.data))
-        .catch(err => console.log(err));
+        .catch(err => {
+          console.log(err);
+          setApiError("Error: Request failed with status code 400");
+        });
     } else {
       axios
         .post(`${baseUrl}/adv/move`, { direction: direction }, authHeader)
@@ -752,15 +765,17 @@ const App = () => {
           roomGraph[currRoom][flip(direction)] = oldRoom;
           localStorage.setItem("roomGraph", JSON.stringify(roomGraph));
           setRoom(res.data);
-         
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+          console.log(err);
+          setApiError("Error: Request failed with status code 400");
+        });
     }
   };
 
   const shuffle = array => {
     for (let i = array.length - 1; i > 0; i--) {
-      let j = Math.floor(Math.random() * (i + 1)); 
+      let j = Math.floor(Math.random() * (i + 1));
       [array[i], array[j]] = [array[j], array[i]];
     }
     return array;
@@ -818,6 +833,7 @@ const App = () => {
           if (roomGraph[room][exit] === target) {
             path.push(roomGraph[room][exit]);
             console.log(path);
+            setShortcut(path);
             return path;
           }
           let path_copy = [...path];
@@ -850,10 +866,12 @@ const App = () => {
       })
       .catch(err => {
         console.log(err);
+        setApiError("Error: Request failed with status code 400");
       });
   };
 
   const startMining = () => {
+    setConsoleLog(true)
     if (currentRoom.room_id === 250) {
       let prevBlock = "";
       axios
@@ -871,6 +889,7 @@ const App = () => {
             p = Math.floor(Math.random() * 1000000000);
           }
           console.log("proof", p);
+          setProof(p);
           setTimeout(() => {
             axios
               .post(`${baseUrl}/bc/mine`, { proof: p }, authHeader)
@@ -887,6 +906,7 @@ const App = () => {
     let guessHash = hash(guess);
     if (proof % 10000 === 0) {
       console.log("guessHash", guessHash);
+      setGuess(guessHash);
     }
 
     let startString = "";
@@ -905,46 +925,109 @@ const App = () => {
 
   return (
     <div className="App">
-      <div className="room-info">
-        <div>Title: {currentRoom.title}</div>
-        <div>Room: {currentRoom.room_id}</div>
-        <div>Coordinates: {currentRoom.coordinates}</div>
-        <div>Description: {currentRoom.description}</div>
-        <div>Exits: {currentRoom.exits}</div>
-        <div>Items: {currentRoom.items}</div>
+      {/* {console.log(currentRoom)} */}
+      <img src={Logo} className="logo" />
+      <div className="dashboard">
+        <div className="room-info">
+          <div className="info-text">
+            <img src={Dashboard} className="dashboard-logo" />
+            <div>
+              {currentRoom.title}, ID: {currentRoom.room_id}
+            </div>
+            <div>Coordinates: {currentRoom.coordinates}</div>
+            <div>Description: {currentRoom.description}</div>
+            {/* <div>Exits: {currentRoom.exits}</div> */}
+            <div>
+              Items:{" "}
+              {currentRoom.items && currentRoom.items.length > 0
+                ? currentRoom.items
+                : "No items"}
+            </div>
+            {/* {console.log(currentRoom.items)} */}
+            <section className="cooldown">
+              {cooldown > 0 ? `Cooldown: ${cooldown}` : "Cooldown Over"}
+            </section>
+          </div>
+        </div>
+
+        <div className="commands">
+          <div className="directions">
+            <img src={Directions} className="directions-logo" />
+
+            {currentRoom.exits &&
+              currentRoom.exits.map(exit => (
+                <button
+                  key={exit}
+                  className="move-btn"
+                  onClick={() => move(exit)}
+                >
+                  {exit.toUpperCase()}
+                </button>
+              ))}
+          </div>
+          <div className="actionscontainer">
+            <div className="shortcuts">
+              <img src={Shortcuts} className="shortcut-logo" />
+              {currentRoom.room_id === 1 ? (
+                ""
+              ) : (
+                <button onClick={() => routeToTarget("shop")}>Shop</button>
+              )}
+
+              {currentRoom.room_id === 467 ? (
+                ""
+              ) : (
+                <button onClick={() => routeToTarget("pirate")}>
+                  Pirate Ry's
+                </button>
+              )}
+              {currentRoom.room_id === 250 ? (
+                ""
+              ) : (
+                <button onClick={() => routeToTarget("mine")}>Mine</button>
+              )}
+            </div>
+            <div className="actions">
+              {currentRoom.room_id === 1 ||
+              (currentRoom.items && currentRoom.items.length > 0) ||
+              currentRoom.room_id === 467 ||
+              currentRoom.room_id === 250 ? (
+                <img src={Actions} className="actions-logo" />
+              ) : (
+                ""
+              )}
+              {currentRoom.room_id === 1 ? (
+                <button onClick={() => sell()}>Sell Item</button>
+              ) : (
+                ""
+              )}
+              {currentRoom.items && currentRoom.items.length > 0 ? (
+                <button onClick={() => pickUp()}>Take Item</button>
+              ) : (
+                ""
+              )}
+              {currentRoom.room_id === 467 ? (
+                <button onClick={() => changeName()}>Change Name</button>
+              ) : (
+                ""
+              )}
+              {currentRoom.room_id === 250 ? (
+                <button onClick={() => startMining()}>Mine a Coin</button>
+              ) : (
+                ""
+              )}
+            </div>
+            <PaperComponent
+              shortcut={shortcut}
+              currentRoom={currentRoom}
+              Apierror={Apierror}
+              guess={guess}
+              proof={proof}
+              consoleLog={consoleLog}
+            />
+          </div>
+        </div>
       </div>
-      <div>
-        {currentRoom.exits &&
-          currentRoom.exits.map(exit => (
-            <button key={exit} className="move-btn" onClick={() => move(exit)}>
-              {exit.toUpperCase()}
-            </button>
-          ))}
-      </div>
-      <button onClick={() => routeToTarget("shop")}>
-        Go to Shop
-      </button>
-      <button onClick={() => routeToTarget("pirate")}>
-        Go to Pirate Room
-      </button>
-      <button onClick={() => routeToTarget("mine")}>
-        Go to Mining Room
-      </button>
-      <button onClick={() => pickUp()}>
-        Take Item
-      </button>
-      <button onClick={() => sell()}>
-        Sell Item
-      </button>
-      <button onClick={() => changeName()}>
-        Change Name
-      </button>
-      <button onClick={() => startMining()}>
-        Mine a Coin
-      </button>
-      <section className="cooldown">
-        {cooldown > 0 ? `Cooldown: ${cooldown}` : "Cooldown Over"}
-      </section>
     </div>
   );
 };

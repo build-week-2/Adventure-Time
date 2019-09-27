@@ -1,0 +1,160 @@
+.App {
+  text-align: center;
+}
+.dashboard {
+  margin: auto;
+  width: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+.room-info {
+  background-image: url("https://www.freeiconspng.com/uploads/scroll-background-png-8.png");
+  /* -webkit-transform: rotate(30deg);
+  -moz-transform: rotate(30deg);
+  -ms-transform: rotate(30deg);
+  -o-transform: rotate(30deg);
+  transform: rotate(30deg); */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  width: 600px;
+  height: 500px;
+}
+
+.info-text {
+  margin: auto;
+  margin-top: 120px;
+  max-width: 350px;
+  color:rgb(129, 28, 31);
+}
+
+.commands {
+  background-image: url("https://www.freeiconspng.com/uploads/scroll-background-png-8.png");
+  /* -webkit-transform: rotate(30deg);
+  -moz-transform: rotate(30deg);
+  -ms-transform: rotate(30deg);
+  -o-transform: rotate(30deg);  */
+  /* transform: rotate(30deg); */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  width: 600px;
+  height: 500px;
+  display: flex;
+  justify-content: center;
+}
+
+.directions {
+  margin-top: 120px;
+  display: flex;
+  flex-direction: column;
+}
+
+.actionscontainer {
+  margin-top: 120px;
+margin-left:5px;
+}
+
+.logo {
+  margin: 30px auto;
+  max-width:500px;
+  width:100%;
+}
+.actions-logo {
+  width: 120px;
+}
+.shortcut-logo {
+  width: 150px;
+}
+.directions-logo{
+  width: 120px;
+}
+
+.dashboard-logo{
+  width: 200px;
+}
+
+.shortcuts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+button {
+  border:none;
+  background: url('./components/button.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  width: 180px;
+  height:40px;
+  margin: 0 auto;
+  font-family: 'Fruktur';
+  font-weight: bold;
+  font-size:24px;
+  color:rgb(129, 28, 31);
+  text-align: right;
+  
+}
+button:hover {
+  cursor: pointer;
+}
+
+.move-btn{
+  background: url('./components/dbutton.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  width: 90px;
+  height:60px;
+  margin: 0 auto;
+  font-family: 'Fruktur';
+  font-weight: bold;
+  font-size:35px;
+  color:rgb(129, 28, 31);
+  text-align: right;
+}
+
+.consolelog{
+  background: black;
+  color:white;
+ 
+}
+
+.log{
+  color: white
+}
+
+/* TODO: FiX Up UI to look nice! 
+* Add some "Real" buttons
+* Style input from server
+* make it look cool most of all
+*/
+
+/* .App-logo {
+  height: 40vmin;
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #09d3ac;
+} */
